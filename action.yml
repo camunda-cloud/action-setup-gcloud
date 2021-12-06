@@ -1,0 +1,92 @@
+name: Configure Google Cloud SDK tools
+description: |
+  Download the Google SDK tools and authenticate against the Google Cloud APIs.
+inputs:
+  project_id:
+    required: false
+    description: |
+      GCP project ID to use.
+
+      By default, it will use the project ID associated with the Service
+      Account authenticated.
+
+  service_account_key:
+    default: null
+    required: false
+    description: Service account key to use.
+
+  docker_auth:
+    default: true
+    required: false
+    description: Authenticate Docker against Google Container Registry?
+
+  gcloud_version:
+    default: latest
+    required: false
+    description: Version of the gcloud SDK to install.
+
+  gke_cluster_name:
+    default: null
+    required: false
+    description: Name of a GKE Cluster to authenticate against
+
+  gke_cluster_zone:
+    default: null
+    required: false
+    description: |
+      Zone of the **zonal** GKE Cluster to authenticate against.
+      Conflict with `gke_cluster_region`.
+
+  gke_cluster_region:
+    default: null
+    required: false
+    description: |
+      Region of the **regional** GKE Cluster to authenticate against.
+      Conflict with `gke_cluster_zone`.
+
+  kustomize_version:
+    required: false
+    description: Version of Kustomize to install.
+
+runs:
+  using: composite
+  steps:
+    - name: Configure Google SDK
+      uses: google-github-actions/setup-gcloud@v0.2.1
+      with:
+        version: ${{ inputs.gcloud_version }}
+        project_id: ${{ inputs.project_id }}
+        service_account_key: ${{ inputs.service_account_key }}
+        export_default_credentials: true
+
+    - name: Authenticate for Google Container Registry
+      shell: bash
+      if: ${{ inputs.docker_auth == 'true'}}
+      run: gcloud auth configure-docker
+
+    - name: Authenticate for GKE (regional cluster)
+      shell: bash
+      if: ${{ inputs.gke_cluster_name != '' && inputs.gke_cluster_region != '' }}
+      run: |
+        gcloud container clusters get-credentials \
+          ${{ inputs.gke_cluster_name }} \
+          --project ${{ inputs.project_id }} \
+          --region ${{ inputs.gke_cluster_region }}
+
+    - name: Authenticate for GKE (zonal cluster)
+      shell: bash
+      if: ${{ inputs.gke_cluster_name != '' && inputs.gke_cluster_zone != '' }}
+      run: |
+        gcloud container clusters get-credentials \
+          ${{ inputs.gke_cluster_name }} \
+          --project ${{ inputs.project_id }} \
+          --zone ${{ inputs.gke_cluster_zone }}
+
+    - name: Show Google SDK info
+      shell: bash
+      run: gcloud info
+
+    - name: Configure Kustomize
+      uses: stefanprodan/kube-tools@v1
+      with:
+        kustomize: ${{ inputs.kustomize_version }}
