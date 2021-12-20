@@ -65,10 +65,7 @@ To authenticate against a specific GKE cluster, use:
 
     # The name of the GKE cluster:
     gke_cluster_name: integration-worker-1
-    gke_cluster_region: europe-west1
-
-    # For a zonal cluster:
-    gke_cluster_zone: europe-west1-d
+    gke_cluster_location: europe-west1 # or a zonal cluster with europe-west1-d
 ```
 
 This corresponds to the `gcloud container clusters get-credentials $NAME --region $REGION` (or `--zone $ZONE`) `gcloud` command.
