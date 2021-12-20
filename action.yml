@@ -30,19 +30,12 @@ inputs:
     required: false
     description: Name of a GKE Cluster to authenticate against
 
-  gke_cluster_zone:
+  gke_cluster_location:
     default: null
     required: false
     description: |
-      Zone of the **zonal** GKE Cluster to authenticate against.
-      Conflict with `gke_cluster_region`.
+      Location of the GKE cluster (zonal or regional) to authenticate against.
 
-  gke_cluster_region:
-    default: null
-    required: false
-    description: |
-      Region of the **regional** GKE Cluster to authenticate against.
-      Conflict with `gke_cluster_zone`.
 
   kustomize_version:
     required: false
@@ -65,22 +58,10 @@ runs:
       run: gcloud auth configure-docker
 
     - name: Authenticate for GKE (regional cluster)
-      shell: bash
-      if: ${{ inputs.gke_cluster_name != '' && inputs.gke_cluster_region != '' }}
-      run: |
-        gcloud container clusters get-credentials \
-          ${{ inputs.gke_cluster_name }} \
-          --project ${{ inputs.project_id }} \
-          --region ${{ inputs.gke_cluster_region }}
-
-    - name: Authenticate for GKE (zonal cluster)
-      shell: bash
-      if: ${{ inputs.gke_cluster_name != '' && inputs.gke_cluster_zone != '' }}
-      run: |
-        gcloud container clusters get-credentials \
-          ${{ inputs.gke_cluster_name }} \
-          --project ${{ inputs.project_id }} \
-          --zone ${{ inputs.gke_cluster_zone }}
+      uses: google-github-actions/get-gke-credentials@v0.4.0
+      with:
+        cluster_name: ${{ inputs.gke_cluster_name }}
+        location: ${{ inputs.gke_location }}
 
     - name: Show Google SDK info
       shell: bash
