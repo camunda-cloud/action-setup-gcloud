@@ -36,7 +36,6 @@ inputs:
     description: |
       Location of the GKE cluster (zonal or regional) to authenticate against.
 
-
   kustomize_version:
     required: false
     description: Version of Kustomize to install.
@@ -45,12 +44,12 @@ runs:
   using: composite
   steps:
     - name: Google Cloud authentication
-      uses: google-github-actions/auth@v0.5.0
+      uses: google-github-actions/auth@v0.6.0
       with:
         credentials_json: ${{ inputs.service_account_key }}
 
     - name: Configure Google SDK
-      uses: google-github-actions/setup-gcloud@v0.2.1
+      uses: google-github-actions/setup-gcloud@v0.5.0
       with:
         version: ${{ inputs.gcloud_version }}
         project_id: ${{ inputs.project_id }}
@@ -61,7 +60,7 @@ runs:
       run: gcloud auth configure-docker
 
     - name: Authenticate for GKE (regional cluster)
-      uses: google-github-actions/get-gke-credentials@v0.4.0
+      uses: google-github-actions/get-gke-credentials@v0.5.0
       with:
         cluster_name: ${{ inputs.gke_cluster_name }}
         location: ${{ inputs.gke_cluster_location }}
