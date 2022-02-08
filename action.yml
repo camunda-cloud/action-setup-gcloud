@@ -59,7 +59,8 @@ runs:
       if: ${{ inputs.docker_auth == 'true'}}
       run: gcloud auth configure-docker
 
-    - name: Authenticate for GKE (regional cluster)
+    - name: Authenticate for GKE
+      if: ${{ inputs.gke_cluster_name != '' }}
       uses: google-github-actions/get-gke-credentials@v0.5.0
       with:
         cluster_name: ${{ inputs.gke_cluster_name }}
